@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"mainPet/internal/handler"
+	"mainPet/internal/logger"
 	"mainPet/internal/repository"
 	"mainPet/internal/service"
 	"net/http"
@@ -10,23 +10,24 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/sirupsen/logrus"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func main() {
-	// Initialize logger
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	// Инициализируем логгеры
+	requestLogger := logger.NewRequestLogger("logs/request.log")
+	responseLogger := logger.NewResponseLogger("logs/response.log")
+	errorLogger := logger.NewErrorLogger("logs/error.log")
 
 	// Initialize config
 	if err := initConfig(); err != nil {
-		log.Fatalf("error initializing config: %s", err.Error())
+		errorLogger.Fatalf("error initializing config: %s", err.Error())
 	}
 	// Загружаем переменные окружения
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error loading env variables: %s", err.Error())
+		errorLogger.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	// Инициализируем postgres
@@ -39,12 +40,12 @@ func main() {
 		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
-		log.Fatalf("failed to initialize db: %s", err.Error())
+		errorLogger.Fatalf("failed to initialize db: %s", err.Error())
 	}
 	// Инициализируем репозитории
 	repo := repository.NewRepository(db)
 	service := service.NewService(repo)
-	handlers := handler.NewHandler(service)
+	handlers := handler.NewHandler(service, requestLogger, responseLogger, errorLogger)
 
 	server := &http.Server{
 		Addr:         viper.GetString("port"),
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("error occured while running http server: %s", err.Error())
+		errorLogger.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }
 
