@@ -1,17 +1,14 @@
-version: '3.8'
 
 services:
   todo-list:
     build: ./
-    command: ./main
     ports: 
       - 8080:8080
     depends_on:
-      db: 
+      db:
         condition: service_healthy
         restart: true
     
-
   db:
     restart: always
     image: postgres:latest
@@ -23,8 +20,8 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: mainpet
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: postgres
     ports:
-      - 5432:5432
+      - 5436:5432

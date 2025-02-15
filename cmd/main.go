@@ -5,6 +5,7 @@ import (
 	"mainPet/internal/logger"
 	"mainPet/internal/repository"
 	"mainPet/internal/service"
+	"mainPet/pkg/migrator"
 	"net/http"
 	"os"
 	"time"
@@ -34,7 +35,7 @@ func main() {
 	db, err := repository.NewPostgres(repository.Config{
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
-		User:     viper.GetString("db.user"),
+		Username: viper.GetString("db.username"),
 		DBName:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
 		Password: os.Getenv("DB_PASSWORD"),
@@ -42,13 +43,19 @@ func main() {
 	if err != nil {
 		errorLogger.Fatalf("failed to initialize db: %s", err.Error())
 	}
+
+	// Запускаем миграции
+	if err := migrator.Migrate(db); err != nil {
+		errorLogger.Fatalf("failed to migrate db: %s", err.Error())
+	}
+
 	// Инициализируем репозитории
 	repo := repository.NewRepository(db)
 	service := service.NewService(repo)
 	handlers := handler.NewHandler(service, requestLogger, responseLogger, errorLogger)
 
 	server := &http.Server{
-		Addr:         viper.GetString("port"),
+		Addr:         ":" + viper.GetString("srv.port"),
 		Handler:      handlers.InitRoutes(),
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,

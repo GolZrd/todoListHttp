@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Host     string
 	Port     string
-	User     string
+	Username string
 	DBName   string
 	SSLMode  string
 	Password string
@@ -19,8 +19,8 @@ type Config struct {
 // Эта функция используется непосредственно в main.go
 func NewPostgres(cfg Config) (*sqlx.DB, error) {
 
-	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode))
+	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,5 @@
-build:
+build: 
+	docker-compose build todo-list-http  
+
 run:
-
-migrate-up:
-	migrate -path migrations -database 'postgres://postgres:qwerty@localhost:5432/mainpet?sslmode=disable' up
-
-migrate-down:
-	migrate -path migrations -database 'postgres://postgres:qwerty@localhost:5432/mainpet?sslmode=disable' down
+	docker-compose up todo-list-http

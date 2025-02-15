@@ -23,8 +23,8 @@ func NewTodoListPostgres(db *sqlx.DB) *TodoListPostgres {
 func (r *TodoListPostgres) Create(task model.Task) (int, error) {
 	var id int
 	// Создаем запрос к бд
-	query := `INSERT INTO todo_list (title, description) VALUES (:title, :description) RETURNING id`
-	err := r.db.QueryRow(query).Scan(&id)
+	query := `INSERT INTO todo_list (title, description) VALUES ($1, $2) RETURNING id`
+	err := r.db.QueryRow(query, task.Title, task.Description).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create todo list: %w", err)
 	}
