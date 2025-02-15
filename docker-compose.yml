@@ -1,6 +1,6 @@
 
 services:
-  todo-list:
+  todo-list-http:
     build: ./
     ports: 
       - 8080:8080
@@ -18,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ./data:/var/lib/postgresql/data
+      - ./.database:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: mainpet
       POSTGRES_PASSWORD: ${DB_PASSWORD}
