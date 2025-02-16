@@ -13,6 +13,7 @@ import (
 type TodoList interface {
 	Create(task model.Task) (int, error) //Создание одной заметки
 	GetAll() ([]model.Task, error)       //Получение всех заметок
+	GetById(id int) (model.Task, error)  //Получение одной заметки
 	Delete(id int) error                 //Удаление одной заметки
 	Done(id int) error                   //Отметка заметки как выполненной
 }

@@ -7,7 +7,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-        restart: true
+      redis:
+        condition: service_healthy
     
   db:
     restart: always
@@ -25,3 +26,17 @@ services:
       POSTGRES_USER: postgres
     ports:
       - 5436:5432
+  redis:
+    image: redis:latest
+    restart: always
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 6380:6379
+    volumes:
+      - ./.redis_data:/data

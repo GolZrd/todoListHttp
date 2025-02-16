@@ -49,9 +49,19 @@ func main() {
 		errorLogger.Fatalf("failed to migrate db: %s", err.Error())
 	}
 
+	// Инициализируем redis кэш
+	cache, err := repository.NewRedis(repository.RedisConfig{
+		Addr:     viper.GetString("redis.addr"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       viper.GetInt("redis.db"),
+	})
+	if err != nil {
+		errorLogger.Fatalf("failed to initialize redis: %s", err.Error())
+	}
+
 	// Инициализируем репозитории
 	repo := repository.NewRepository(db)
-	service := service.NewService(repo)
+	service := service.NewService(repo, cache)
 	handlers := handler.NewHandler(service, requestLogger, responseLogger, errorLogger)
 
 	server := &http.Server{

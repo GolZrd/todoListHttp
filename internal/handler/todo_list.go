@@ -72,6 +72,40 @@ func (h *Handler) GetAllTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// Получение задачи по id
+func (h *Handler) GetTaskById(c *gin.Context) {
+	// Логирование входящего запроса
+	h.requestLog.WithFields(logrus.Fields{
+		"method": c.Request.Method,
+		"path":   c.Request.URL.Path,
+	}).Info("Incoming request")
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorLog.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("Failed to convert id to int")
+		newErrorResponse(c, http.StatusBadRequest, "invalid id param")
+		return
+	}
+
+	task, err := h.services.GetById(id)
+	if err != nil {
+		h.errorLog.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("Failed to get task by id")
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Логирование исходящего ответа
+	h.responseLog.WithFields(logrus.Fields{
+		"status": http.StatusOK,
+	}).Info("Outgoing response")
+
+	c.JSON(http.StatusOK, task)
+}
+
 // Отмечаем задачу как сделанную
 func (h *Handler) DoneTask(c *gin.Context) {
 	h.requestLog.WithFields(logrus.Fields{

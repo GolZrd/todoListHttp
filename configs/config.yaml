@@ -7,3 +7,7 @@ db:
   username: postgres
   dbname: mainpet
   sslmode: "disable"
+
+redis:
+  addr: redis:6379
+  db: 0

@@ -46,6 +46,20 @@ func (r *TodoListPostgres) GetAll() ([]model.Task, error) {
 	return todos, nil
 }
 
+// Получение одной заметки по id
+func (r *TodoListPostgres) GetById(id int) (model.Task, error) {
+	var todo model.Task
+
+	query := `SELECT * FROM todo_list WHERE id = $1`
+
+	err := r.db.Get(&todo, query, id)
+	if err != nil {
+		return model.Task{}, fmt.Errorf("failed to get task with id %d: %w", id, err)
+	}
+
+	return todo, nil
+}
+
 // Удаление заметки по id
 func (r *TodoListPostgres) Delete(id int) error {
 	query := `DELETE FROM todo_list WHERE id = $1`
