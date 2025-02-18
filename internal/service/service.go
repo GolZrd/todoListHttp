@@ -1,6 +1,7 @@
 package service
 
 import (
+	"mainPet/internal/kafka"
 	"mainPet/internal/model"
 	"mainPet/internal/repository"
 
@@ -19,11 +20,12 @@ type TodoList interface {
 type Service struct {
 	TodoList
 	Cache *redis.Client
+	Kafka kafka.Producer
 }
 
 // Конструктор для создания нового сервиса
-func NewService(repo *repository.Repository, cache *redis.Client) *Service {
+func NewService(repo *repository.Repository, cache *redis.Client, kafka kafka.Producer) *Service {
 	return &Service{
-		TodoList: NewTodoListService(repo.TodoList, cache),
+		TodoList: NewTodoListService(repo.TodoList, cache, kafka),
 	}
 }

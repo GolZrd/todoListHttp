@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"mainPet/internal/kafka"
 	"mainPet/internal/model"
 	"mainPet/internal/repository"
+	"os"
 	"strconv"
 	"time"
 
@@ -15,20 +17,29 @@ import (
 type TodoListService struct {
 	repo  repository.TodoList
 	cache *redis.Client
+	kafka kafka.Producer
 }
 
-func NewTodoListService(repo repository.TodoList, cache *redis.Client) *TodoListService {
+func NewTodoListService(repo repository.TodoList, cache *redis.Client, kafka kafka.Producer) *TodoListService {
 	return &TodoListService{
 		repo:  repo,
 		cache: cache,
+		kafka: kafka,
 	}
 }
 
 func (s *TodoListService) Create(task model.Task) (int, error) {
+	if err := s.kafka.Produce("Create", os.Getenv("KAFKA_TOPIC")); err != nil {
+		logrus.Warn("Failed to produce message: ", err)
+	}
+
 	return s.repo.Create(task)
 }
 
 func (s *TodoListService) GetAll() ([]model.Task, error) {
+	if err := s.kafka.Produce("GetAll", os.Getenv("KAFKA_TOPIC")); err != nil {
+		logrus.Warn("Failed to produce message: ", err)
+	}
 	return s.repo.GetAll()
 }
 
@@ -59,15 +70,26 @@ func (s *TodoListService) GetById(id int) (model.Task, error) {
 		s.cache.Set(context.Background(), strconv.Itoa(id), taskJson, 20*time.Second)
 	}
 
+	if err := s.kafka.Produce("GetById", os.Getenv("KAFKA_TOPIC")); err != nil {
+		logrus.Warn("Failed to produce message: ", err)
+	}
+
 	return task, err
 }
 
 func (s *TodoListService) Delete(id int) error {
 	s.cache.Del(context.Background(), strconv.Itoa(id))
+	if err := s.kafka.Produce("Delete", os.Getenv("KAFKA_TOPIC")); err != nil {
+		logrus.Warn("Failed to produce message: ", err)
+	}
+
 	return s.repo.Delete(id)
 }
 
 func (s *TodoListService) Done(id int) error {
 	s.cache.Del(context.Background(), strconv.Itoa(id))
+	if err := s.kafka.Produce("Done", os.Getenv("KAFKA_TOPIC")); err != nil {
+		logrus.Warn("Failed to produce message: ", err)
+	}
 	return s.repo.Done(id)
 }

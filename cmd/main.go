@@ -2,6 +2,7 @@ package main
 
 import (
 	"mainPet/internal/handler"
+	"mainPet/internal/kafka"
 	"mainPet/internal/logger"
 	"mainPet/internal/repository"
 	"mainPet/internal/service"
@@ -59,9 +60,15 @@ func main() {
 		errorLogger.Fatalf("failed to initialize redis: %s", err.Error())
 	}
 
+	// Инициализируем kafka
+	kafka, err := kafka.NewProducer("kafka:29091")
+	if err != nil {
+		errorLogger.Fatalf("failed to initialize kafka: %s", err.Error())
+	}
+
 	// Инициализируем репозитории
 	repo := repository.NewRepository(db)
-	service := service.NewService(repo, cache)
+	service := service.NewService(repo, cache, *kafka)
 	handlers := handler.NewHandler(service, requestLogger, responseLogger, errorLogger)
 
 	server := &http.Server{

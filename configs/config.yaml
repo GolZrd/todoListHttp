@@ -11,3 +11,8 @@ db:
 redis:
   addr: redis:6379
   db: 0
+
+kafka:
+  broker: 
+  - kafka:29091
+  consumerGroup: mainpet
