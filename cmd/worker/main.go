@@ -7,18 +7,19 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 // Consumer кафки, который будет получать сообщения и сохранять их в лог
 func main() {
-	c, err := kafka.NewConcumer(viper.GetStringSlice("kafka.broker"), os.Getenv("KAFKA_TOPIC"), viper.GetString("kafka.consumerGroup"), "logs/kafka_events.log")
+	c, err := kafka.NewConcumer("kafka:29091", "todo_list", "mainpet", "logs/kafka_events.log")
 	if err != nil {
 		logrus.Fatalf("failed to create consumer: %s", err.Error())
 	}
 
 	// Запускаем консюмер в горутине
-	go c.Srart()
+	go func() {
+		c.Srart()
+	}()
 
 	// реализуем graceful shutdown
 	sigchan := make(chan os.Signal, 1)

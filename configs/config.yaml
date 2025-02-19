@@ -13,6 +13,5 @@ redis:
   db: 0
 
 kafka:
-  broker: 
-  - kafka:29091
+  broker: "kafka:29091"
   consumerGroup: mainpet

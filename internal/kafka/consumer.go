@@ -17,7 +17,7 @@ type Consumer struct {
 }
 
 // Создадим конструктор для консьюмера, также как и в продюсере, сюда передаем адреса наших брокеров
-func NewConcumer(adress []string, topic string, consumerGroup string, logfile string) (*Consumer, error) {
+func NewConcumer(adress string, topic string, consumerGroup string, logfile string) (*Consumer, error) {
 	// Создаем конфиг для консьюмера
 	cfg := &kafka.ConfigMap{
 		"bootstrap.servers":        adress,        // Список брокеров
@@ -42,6 +42,9 @@ func NewConcumer(adress []string, topic string, consumerGroup string, logfile st
 
 	// Создаем логгер, который будет сохранять все сообщения в лог файле
 	logger := logrus.New()
+	if err := os.MkdirAll("logs", 0755); err != nil {
+		logrus.Fatalf("Failed to create logs directory: %v", err)
+	}
 	file, err := os.OpenFile(logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		logrus.Fatalf("Failed to create request log file: %v", err)

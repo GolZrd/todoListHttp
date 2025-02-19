@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// Инициализируем kafka
-	kafka, err := kafka.NewProducer("kafka:29091")
+	kafka, err := kafka.NewProducer(viper.GetString("kafka.broker"))
 	if err != nil {
 		errorLogger.Fatalf("failed to initialize kafka: %s", err.Error())
 	}
